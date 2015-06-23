@@ -891,8 +891,16 @@ impl<'a> WindowHelpers for &'a Window {
     }
 
     // https://html.spec.whatwg.org/multipage/#accessing-other-browsing-contexts
-    fn IndexedGetter(self, _index: u32, _found: &mut bool) -> Option<Root<Window>> {
-        None
+    fn IndexedGetter(self, index: u32, found: &mut bool) -> Option<Root<Window>> {
+        *found = false;
+
+        let children = self.page().children.borrow();
+
+        children.get(index as usize).map(|page| {
+            *found = true;
+
+            page.window()
+        })
     }
 
     fn thaw(self) {
